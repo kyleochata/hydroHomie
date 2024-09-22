@@ -24,6 +24,7 @@ var AllPlants = []plant.Plant{{
 // Capitalize 'Plants' to make it accessible from other files
 type HydroApp struct {
 	Plants []plant.Plant
+	cursor int
 }
 
 func (ha HydroApp) Init() tea.Cmd {
@@ -36,6 +37,19 @@ func (ha HydroApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			return ha, tea.Quit
+		case "up":
+			if ha.cursor <= 0 {
+				ha.cursor = len(ha.Plants) - 1
+			} else {
+				ha.cursor--
+			}
+		case "down":
+			if ha.cursor >= len(ha.Plants)-1 {
+				ha.cursor = 0
+			} else {
+				ha.cursor++
+			}
+
 		}
 
 	}
@@ -44,6 +58,7 @@ func (ha HydroApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (ha HydroApp) View() string {
 	var s strings.Builder
+	s.WriteString("\u2191 or k to move up\t \u2193 or j to move down\n")
 	for _, plant := range ha.Plants {
 		s.WriteString(ha.plantView(plant) + "\n\n")
 	}
