@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	gloss "github.com/charmbracelet/lipgloss"
 	"github.com/kyleochata/hydrohomie/load"
 	"github.com/kyleochata/hydrohomie/plant"
 )
@@ -68,20 +68,26 @@ func (ha HydroApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return ha, nil
 }
 func (ha HydroApp) View() string {
-	var s strings.Builder
-	s.WriteString("\u2191 or k to move up\t \u2193 or j to move down\n")
-	for ind, plant := range ha.Plants {
-		s.WriteString(ha.plantView(plant, ind) + "\n\n")
+	var uiEl = []string{"\u2191 or k: move up\t \u2193 or j to move down\n"}
+	for i, p := range ha.Plants {
+		uiEl = append(uiEl, ha.plantView(p, i))
 	}
-	s.WriteString("Press Ctrl+S to save changes")
-	s.WriteString("Press Ctrl+C or Esc to quit")
-	return s.String()
+	uiEl = append(uiEl, "Ctrl+S: Save | Ctrl+C or Esc: Quit")
+	return gloss.JoinVertical(gloss.Left, uiEl...)
 }
 
 func (ha HydroApp) plantView(plant plant.Plant, index int) string {
-	s := "	%s\n	%s"
+	plantText := ha.plantText(plant, index)
 	if index == ha.SelectedPlant {
-		s = "🚰\t%s\n	%s"
+		return ha.boxStyleSelected().Render(plantText)
+	}
+	return ha.boxStyle().Render(plantText)
+}
+
+func (ha HydroApp) plantText(plant plant.Plant, index int) string {
+	s := "%s\n%s"
+	if index == ha.SelectedPlant {
+		s = "🚰 %s\n%s"
 	}
 	return fmt.Sprintf(s, plant.Name, ha.plantLastWatered(plant))
 }
@@ -118,4 +124,20 @@ func savePlantsToMemory(plants []plant.Plant) tea.Cmd {
 		}
 		return nil
 	}
+}
+
+// ========================LipGloss=====================================
+func (ha HydroApp) boxStyle() gloss.Style {
+	return gloss.NewStyle().
+		Border(gloss.RoundedBorder()).
+		BorderForeground(gloss.Color("#FFFFFF")).
+		Padding(0, 1, 0, 1).
+		Foreground(gloss.Color("#FFFFFF"))
+}
+func (ha HydroApp) boxStyleSelected() gloss.Style {
+	return gloss.NewStyle().
+		BorderForeground(gloss.Color("#00FF00")).
+		Border(gloss.RoundedBorder()).
+		Bold(true).
+		Foreground(gloss.Color(""))
 }
