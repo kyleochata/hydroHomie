@@ -23,8 +23,8 @@ var AllPlants = []plant.Plant{{
 
 // Capitalize 'Plants' to make it accessible from other files
 type HydroApp struct {
-	Plants []plant.Plant
-	cursor int
+	Plants        []plant.Plant
+	SelectedPlant int
 }
 
 func (ha HydroApp) Init() tea.Cmd {
@@ -38,18 +38,21 @@ func (ha HydroApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "esc":
 			return ha, tea.Quit
 		case "up":
-			if ha.cursor <= 0 {
-				ha.cursor = len(ha.Plants) - 1
+			if ha.SelectedPlant > 0 {
+				ha.SelectedPlant--
 			} else {
-				ha.cursor--
+				ha.SelectedPlant = len(ha.Plants) - 1
 			}
 		case "down":
-			if ha.cursor >= len(ha.Plants)-1 {
-				ha.cursor = 0
+			if ha.SelectedPlant < len(ha.Plants)-1 {
+				ha.SelectedPlant++
 			} else {
-				ha.cursor++
+				ha.SelectedPlant = 0
 			}
-
+		case "enter":
+			if len(ha.Plants) > 0 {
+				ha.Plants[ha.SelectedPlant].WaterMe()
+			}
 		}
 
 	}
@@ -59,17 +62,19 @@ func (ha HydroApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (ha HydroApp) View() string {
 	var s strings.Builder
 	s.WriteString("\u2191 or k to move up\t \u2193 or j to move down\n")
-	for _, plant := range ha.Plants {
-		s.WriteString(ha.plantView(plant) + "\n\n")
+	for ind, plant := range ha.Plants {
+		s.WriteString(ha.plantView(plant, ind) + "\n\n")
 	}
 	s.WriteString("Press Ctrl+C or Esc to quit")
 	return s.String()
 }
 
-func (ha HydroApp) plantView(plant plant.Plant) string {
-	return fmt.Sprintf(
-		"	%s\n	%s", plant.Name, ha.plantLastWatered(plant),
-	)
+func (ha HydroApp) plantView(plant plant.Plant, index int) string {
+	s := "	%s\n	%s"
+	if index == ha.SelectedPlant {
+		s = "🚰\t%s\n	%s"
+	}
+	return fmt.Sprintf(s, plant.Name, ha.plantLastWatered(plant))
 }
 func (ha HydroApp) plantLastWatered(plant plant.Plant) string {
 	switch day, ok := plant.LastWatered(); {

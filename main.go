@@ -8,7 +8,7 @@ import (
 )
 
 func InitialModel() HydroApp {
-	return HydroApp{Plants: AllPlants}
+	return HydroApp{Plants: AllPlants, SelectedPlant: 0}
 }
 
 func main() {

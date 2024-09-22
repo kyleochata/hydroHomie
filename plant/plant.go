@@ -7,7 +7,7 @@ type Plant struct {
 	TimeLastWatered time.Time `json:"time_last_watered"`
 }
 
-//last watered method
+//last watered method. Since only reading, we can just use a copy of Plant
 func (p Plant) LastWatered() (days int64, ok bool) {
 	if p.TimeLastWatered.IsZero() {
 		return 0, false
@@ -19,4 +19,9 @@ func (p Plant) LastWatered() (days int64, ok bool) {
 	//.Sub -->> difference between today and lastWatered. Divide by day to
 	//re-establish day as the units
 	return int64(today.Sub(lastWatered) / day), true
+}
+
+//directly updating a value for plant struct. Must use a pointer
+func (p *Plant) WaterMe() {
+	p.TimeLastWatered = time.Now()
 }
