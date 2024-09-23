@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func InitialModel() HydroApp {
-	return HydroApp{Plants: AllPlants, SelectedPlant: 0}
+	return HydroApp{Plants: AllPlants, SelectedPlant: 0, NewPlantInput: textinput.New()}
 }
 
 func main() {
